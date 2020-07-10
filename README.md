@@ -25,4 +25,4 @@ $ docker-compose stop
 $ docker-compose exec app bash
 ```
 
-For more information, see the [Makefile](/infrastructure/Makefire)
+For more information, see the `infrastructure/Makefile`

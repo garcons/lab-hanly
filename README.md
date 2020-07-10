@@ -11,6 +11,7 @@ $ docker-compose up -d --build
 $ docker-compose exec app composer install --prefer-dist --no-interaction
 $ docker-compose exec app cp .env.example .env
 $ docker-compose exec app php artisan key:generate
+$ docker-compose exec app php artisan passport:keys
 $ docker-compose exec app php artisan migrate:fresh --seed
 
 # docker start

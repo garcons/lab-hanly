@@ -13,4 +13,14 @@ class Friend extends Model
     protected $fillable = [
         'nickname', 'email', 'password', 'image_path'
     ];
+
+    public function relationship()
+    {
+        return $this->hasMany(\App\Eloquents\FriendsRelationship::class, 'own_friends_id', 'id');
+    }
+
+    public function pin()
+    {
+        return $this->hasOne(\App\Eloquents\Pin::class, 'friends_id', 'id');
+    }
 }

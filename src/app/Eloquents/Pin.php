@@ -13,4 +13,9 @@ class Pin extends Model
         'latitude',
         'longitude',
     ];
+
+    public function friend()
+    {
+        return $this->hasOne(\App\Eloquents\Friend::class, 'id', 'friends_id');
+    }
 }

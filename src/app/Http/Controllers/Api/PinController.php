@@ -6,16 +6,16 @@ use App\Eloquents\Friend;
 use App\Eloquents\FriendsRelationship;
 use App\Eloquents\Pin;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\PinStoreRequest;
 use Facades\App\Contracts\Distance;
-use Illuminate\Http\Request;
 
 class PinController extends Controller
 {
     /**
-     * @param \Illuminate\Http\Request $request
+     * @param \App\Http\Requests\Api\PinStoreRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(PinStoreRequest $request)
     {
         $newFriends = \DB::transaction(function () use ($request) {
             // こんな風にアクセスしてきた人のIDを取得

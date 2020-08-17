@@ -4,15 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Eloquents\Friend;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Api\ImageStoreRequest;
 
 class ImageController extends Controller
 {
     /**
-     * @param \Illuminate\Http\Request $request
+     * @param \App\Http\Requests\Api\ImageStoreRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(ImageStoreRequest $request)
     {
         $myId = \DB::transaction(function () use ($request) {
             // Tokenから自分のIDを取得

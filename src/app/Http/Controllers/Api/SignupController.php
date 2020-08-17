@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\SignupRequest;
+use App\Http\Resources\AccountResource;
 
 class SignupController extends Controller
 {
     /**
      * @param \App\Http\Requests\Api\SignupRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \App\Http\Resources\AccountResource
      */
     public function signup(SignupRequest $request)
     {
@@ -25,7 +26,6 @@ class SignupController extends Controller
             'nickname' => $nickname,
         ]);
 
-        // とりあえず、そのままレスポンスします（後ほど整形します）
-        return response()->json($stored);
+        return new AccountResource($stored);
     }
 }

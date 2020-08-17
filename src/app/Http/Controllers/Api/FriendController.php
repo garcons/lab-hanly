@@ -13,7 +13,7 @@ class FriendController extends Controller
     /**
      * @param \App\Http\Requests\Api\FriendShowRequest $request
      * @param int $friendId
-     * @return \Illuminate\Http\JsonResponse
+     * @return \App\Http\Resources\FriendResource
      */
     public function show(FriendShowRequest $request, int $friendId)
     {
@@ -22,13 +22,12 @@ class FriendController extends Controller
         // Eloquentを利用してPinとともに取得
         $friend = Friend::with(['pin'])->find($friendId);
 
-        // とりあえず、そのままレスポンスします（後ほど整形します）
-        return response()->json($friend);
+        return new \App\Http\Resources\FriendResource($friend);
     }
 
     /**
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \App\Http\Resources\FriendCollection
      */
     public function list(Request $request)
     {
@@ -52,6 +51,6 @@ class FriendController extends Controller
         //     ->get()
         //     ->pluck('otherFriend');
 
-        return response()->json($friends);
+        return new \App\Http\Resources\FriendCollection($friends);
     }
 }

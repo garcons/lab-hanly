@@ -13,7 +13,7 @@ class PinController extends Controller
 {
     /**
      * @param \App\Http\Requests\Api\PinStoreRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \App\Http\Resources\FriendCollection
      */
     public function store(PinStoreRequest $request)
     {
@@ -76,7 +76,6 @@ class PinController extends Controller
                 ->get();
         });
 
-        // レスポンスはとりあえず、そのまま返す（後で成形する）
-        return response()->json($newFriends);
+        return new \App\Http\Resources\FriendCollection($newFriends);
     }
 }

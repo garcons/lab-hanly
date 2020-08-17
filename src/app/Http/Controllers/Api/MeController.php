@@ -10,7 +10,7 @@ class MeController extends Controller
 {
     /**
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \App\Http\Resources\FriendResource
      */
     public function me(Request $request)
     {
@@ -20,7 +20,6 @@ class MeController extends Controller
         // EloquentからPin情報含めてデータ取得
         $myInfo = Friend::with(['pin'])->find($myId);
 
-        // とりあえず、そのままレスポンスします（後ほど整形します）
-        return response()->json($myInfo);
+        return new \App\Http\Resources\FriendResource($myInfo);
     }
 }

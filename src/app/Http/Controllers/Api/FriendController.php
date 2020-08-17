@@ -5,16 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Eloquents\Friend;
 use App\Eloquents\FriendsRelationship;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\FriendShowRequest;
 use Illuminate\Http\Request;
 
 class FriendController extends Controller
 {
     /**
-     * @param \Illuminate\Http\Request $request
+     * @param \App\Http\Requests\Api\FriendShowRequest $request
      * @param int $friendId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Request $request, int $friendId)
+    public function show(FriendShowRequest $request, int $friendId)
     {
         // パスパラメータは第２引数以降で取得できる
 

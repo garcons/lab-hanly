@@ -10,6 +10,15 @@ use Illuminate\Http\Request;
 
 class FriendController extends Controller
 {
+    protected $friend;
+    protected $relationship;
+
+    public function __construct(Friend $friend, FriendsRelationship $relationship)
+    {
+        $this->friend = $friend;
+        $this->relationship = $relationship;
+    }
+
     /**
      * @param \App\Http\Requests\Api\FriendShowRequest $request
      * @param int $friendId
@@ -17,10 +26,7 @@ class FriendController extends Controller
      */
     public function show(FriendShowRequest $request, int $friendId)
     {
-        // パスパラメータは第２引数以降で取得できる
-
-        // Eloquentを利用してPinとともに取得
-        $friend = Friend::with(['pin'])->find($friendId);
+        $friend = $this->friend->findById($friendId);
 
         return new \App\Http\Resources\FriendResource($friend);
     }
@@ -31,25 +37,10 @@ class FriendController extends Controller
      */
     public function list(Request $request)
     {
-        // Tokenから自分のIDを取得
         $myId = $request->user()->id;
 
-        // Eloquentを利用して、自分の友だちのIDを取得
-        $friendIds = FriendsRelationship::where('own_friends_id', $myId)
-            ->get()
-            ->pluck('other_friends_id')
-            ->toArray();
-
-        // 自分の友だちの情報を取得
-        $friends = Friend::with(['pin'])
-            ->whereIn('id', $friendIds)
-            ->get();
-
-        // 一発で取得するなら、こんな感じ
-        // $friends = FriendsRelationship::with(['otherFriend.pin'])
-        //     ->where('own_friends_id', $myId)
-        //     ->get()
-        //     ->pluck('otherFriend');
+        $friendIds = $this->relationship->myFriends($myId)->pluck('other_friends_id')->toArray();
+        $friends = $this->friend->findByIds($friendIds);
 
         return new \App\Http\Resources\FriendCollection($friends);
     }

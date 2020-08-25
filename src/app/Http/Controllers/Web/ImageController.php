@@ -8,6 +8,13 @@ use Illuminate\Http\Request;
 
 class ImageController extends Controller
 {
+    protected $friend;
+
+    public function __construct(Friend $friend)
+    {
+        $this->friend = $friend;
+    }
+
     /**
      * @param \Illuminate\Http\Request $request
      * @param int $friendId
@@ -15,10 +22,11 @@ class ImageController extends Controller
      */
     public function show(Request $request, int $friendId)
     {
-        // 保存したパスの情報をDBから取得
-        $path = Friend::find($friendId)->image_path;
+        $path = $this->friend->findById($friendId)->image_path;
+        if (!$path) {
+            abort(404);
+        }
 
-        // 取得したパスからファイルレスポンスを生成して返却
         return response()->file(\Storage::disk('local')->path($path));
     }
 }

@@ -11,6 +11,20 @@ use Facades\App\Contracts\Distance;
 
 class PinController extends Controller
 {
+    protected $pin;
+    protected $friend;
+    protected $friendRelationship;
+
+    public function __construct(
+        Pin $pin,
+        Friend $friend,
+        FriendsRelationship $friendRelationship
+    ) {
+        $this->pin = $pin;
+        $this->friend = $friend;
+        $this->friendRelationship = $friendRelationship;
+    }
+
     /**
      * @param \App\Http\Requests\Api\PinStoreRequest $request
      * @return \App\Http\Resources\FriendCollection
@@ -18,62 +32,35 @@ class PinController extends Controller
     public function store(PinStoreRequest $request)
     {
         $newFriends = \DB::transaction(function () use ($request) {
-            // こんな風にアクセスしてきた人のIDを取得
             $myFriendId = $request->user()->id;
 
-            // 自分のPinを削除
-            Pin::where('friends_id', $myFriendId)->delete();
-
-            // 自分のPinとして登録
-            $myPin = new Pin;
-            $myPin->fill([
-                'friends_id' => $myFriendId,
-                'latitude' => $request->input('latitude'),  // こんな風にリクエストデータを取得
-                'longitude' => $request->input('longitude'),
-            ]);
-            $myPin->save();
+            // pinを登録
+            $this->pin->deleteByFriendId($myFriendId);
+            $pin = $this->pin->store(
+                $myFriendId,
+                $request->input('latitude'),
+                $request->input('longitude')
+            );
 
             // すでに友達の人
-            $myFriends = FriendsRelationship::where('own_friends_id', $myFriendId)->get();
+            $myFriends = $this->friendRelationship->myFriends($myFriendId);
 
             // まだ友達ではない人
-            $notFriends = Friend::with(['pin']) // pin情報もこの後使うので、Eagerロード
-                ->where('id', '<>', $myFriendId) // 自分以外
-                ->whereNotIn('id', $myFriends->pluck('other_friends_id')->toArray()) // 既に友達の人は除外
-                ->whereHas('pin', function ($query) {
-                    // whereHasでPinを持っている人だけ
-                    // かつ、追加クエリで、5分前より後にPinを打った人のみ
-                    $query->where('created_at', '>=', now()->subMinutes(5));
-                })
-                ->get();
+            $notFriends = $this->friend->notFriendsWithPin($myFriendId, $myFriends->pluck('other_friends_id')->toArray());
 
             // 近くのピンの人（友達になれそうな人）を探す
-            // 実装は作ってるので、呼ぶだけ
-            $canBeFriendIds = Distance::canBeFriends($myPin->toArray(), $notFriends->pluck('pin')->toArray());
+            $canBeFriendIds = Distance::canBeFriends($pin->toArray(), $notFriends->pluck('pin')->toArray());
 
             // 近くのピンの人がいれば友達になる
             foreach ($canBeFriendIds as $othersId) {
                 // 自分の友達として登録
-                $myRelation = new FriendsRelationship;
-                $myRelation->fill([
-                    'own_friends_id' => $myFriendId,
-                    'other_friends_id' => $othersId,
-                ]);
-                $myRelation->save();
-
+                $this->friendRelationship->getAlongWith($myFriendId, $othersId);
                 // 相手の友達として登録
-                $otherRelation = new FriendsRelationship;
-                $otherRelation->fill([
-                    'own_friends_id' => $othersId,
-                    'other_friends_id' => $myFriendId,
-                ]);
-                $otherRelation->save();
+                $this->friendRelationship->getAlongWith($othersId, $myFriendId);
             }
 
             // 新しく友達になった人
-            return Friend::with(['pin'])
-                ->whereIn('id', $canBeFriendIds)
-                ->get();
+            return $this->friend->findByIds($canBeFriendIds);
         });
 
         return new \App\Http\Resources\FriendCollection($newFriends);

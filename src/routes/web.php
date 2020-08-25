@@ -17,4 +17,4 @@ Route::get('/', function () {
     return 'success'; // ヘルスチェック用
 });
 
-Route::get('/friend/image/{userId}', 'Web\ImageController@show')->name('web.image.get');
+Route::get('/friend/image/{friendId}', 'Web\ImageController@show')->name('web.image.get');
